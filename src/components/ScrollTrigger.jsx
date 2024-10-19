@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 const ScrollTrigger = () => {
   const ref = useRef(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [randomTransforms, setRandomTransforms] = useState([]);
 
   // Scroll progress from Framer Motion's useScroll
   const { scrollYProgress } = useScroll({
@@ -38,15 +39,25 @@ const ScrollTrigger = () => {
     return () => clearInterval(intervalId); 
   }, []);
 
+  // Generate random transforms once when the component is first mounted
+  useEffect(() => {
+    const generateRandomTransforms = () => {
+      return Array.from({ length: text.length }).map(() => ({
+        translateX: Math.random() * 400 - 200,
+        translateY: Math.random() * 400 - 200,
+        rotate: Math.random() * 360 - 180,
+      }));
+    };
+
+    setRandomTransforms(generateRandomTransforms());
+  }, []);
+
   // Sample text
   const text = '"Every word is a step towards creativity, and every shared idea transforms drafts into masterpieces. Together, we write the future."';
   const letters = text.split('');
 
-  // Move useTransform outside of the .map() loop
+  // Framer Motion global transforms
   const opacity = useTransform(scrollYProgress, [0.1, 0.3], [1, 1]);
-  const translateX = letters.map(() => useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]));
-  const translateY = letters.map(() => useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]));
-  const rotate = letters.map(() => useTransform(scrollYProgress, [0, 0.25, 0.5], [0, Math.random() * 360 - 180, 0]));
 
   return (
     <section className=''>
@@ -58,21 +69,25 @@ const ScrollTrigger = () => {
       {/* Scroll-triggered text animation */}
       <div ref={ref} className="md:h-[150vh] h-[20vh] lg:mt-0 md:-mt-40 flex justify-center items-center">
         <motion.div className="flex flex-wrap sm:max-w-[300px] md:max-w-[450px] lg:max-w-[550px] justify-center">
-          {letters.map((letter, index) => (
-            <motion.span
-              key={index}
-              style={{
-                opacity,
-                translateX: translateX[index],
-                translateY: translateY[index],
-                rotate: rotate[index],
-                display: 'inline-block',
-              }}
-              className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-400"
-            >
-              {letter === ' ' ? '\u00A0' : letter}
-            </motion.span>
-          ))}
+          {letters.map((letter, index) => {
+            const { translateX, translateY, rotate } = randomTransforms[index] || {};
+
+            return (
+              <motion.span
+                key={index}
+                style={{
+                  opacity,
+                  translateX: translateX || 0,
+                  translateY: translateY || 0,
+                  rotate: rotate || 0,
+                  display: 'inline-block',
+                }}
+                className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-400"
+              >
+                {letter === ' ' ? '\u00A0' : letter}
+              </motion.span>
+            );
+          })}
         </motion.div>
       </div>
     </section>
