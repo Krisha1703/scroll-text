@@ -22,8 +22,8 @@ const ScrollTrigger = () => {
     zh: '你好',    // Chinese
     ja: 'こんにちは', // Japanese
     ru: 'Здравствуйте', // Russian
-    gu: 'હેલો', // Gujarati
-    th: 'สวัสดี' // Thai
+    gu: 'હેલો', //Gujrati
+    th: 'สวัสดี' //Thai
   };
 
   // Automatically cycle through translations
@@ -39,25 +39,9 @@ const ScrollTrigger = () => {
     return () => clearInterval(intervalId); 
   }, []);
 
-  // Generate random transforms once when the component is first mounted
-  useEffect(() => {
-    const generateRandomTransforms = () => {
-      return Array.from({ length: text.length }).map(() => ({
-        translateX: Math.random() * 400 - 200,
-        translateY: Math.random() * 400 - 200,
-        rotate: Math.random() * 360 - 180,
-      }));
-    };
-
-    setRandomTransforms(generateRandomTransforms());
-  }, []);
-
   // Sample text
   const text = '"Every word is a step towards creativity, and every shared idea transforms drafts into masterpieces. Together, we write the future."';
   const letters = text.split('');
-
-  // Framer Motion global transforms for opacity
-  const opacity = useTransform(scrollYProgress, [0.1, 0.5], [0, 1]);
 
   return (
     <section className=''>
@@ -70,24 +54,22 @@ const ScrollTrigger = () => {
       <div ref={ref} className="md:h-[150vh] h-[20vh] lg:mt-0 md:-mt-40 flex justify-center items-center">
         <motion.div className="flex flex-wrap sm:max-w-[300px] md:max-w-[450px] lg:max-w-[550px] xl:max-w-full mx-40 justify-center">
           {letters.map((letter, index) => {
-            const { translateX, translateY, rotate } = randomTransforms[index] || {};
-
-            // Use a single set of transforms for each letter based on scroll position
-            const xTransform = useTransform(scrollYProgress, [0, 0.5, 1], [translateX, 0, 0]);
-            const yTransform = useTransform(scrollYProgress, [0, 0.5, 1], [translateY, 0, 0]);
-            const rotateTransform = useTransform(scrollYProgress, [0, 0.5, 1], [rotate, 0, 0]);
+              const opacity = useTransform(scrollYProgress, [0.1, 0.3], [1, 1]);
+              const translateX = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]);
+              const translateY = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]);
+              const rotate = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, Math.random() * 360 - 180, 0]);
 
             return (
               <motion.span
                 key={index}
                 style={{
-                  opacity,
-                  translateX: xTransform,
-                  translateY: yTransform,
-                  rotate: rotateTransform,
-                  display: 'inline-block',
-                }}
-                className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-400"
+                    opacity,
+                    translateX,
+                    translateY,
+                    rotate,
+                    display: 'inline-block',
+                  }}
+                className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-600"
               >
                 {letter === ' ' ? '\u00A0' : letter}
               </motion.span>
