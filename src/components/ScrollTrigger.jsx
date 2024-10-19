@@ -4,7 +4,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 const ScrollTrigger = () => {
   const ref = useRef(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
-  const [randomTransforms, setRandomTransforms] = useState([]);
 
   // Scroll progress from Framer Motion's useScroll
   const { scrollYProgress } = useScroll({
