@@ -22,8 +22,8 @@ const ScrollTrigger = () => {
     zh: '你好',    // Chinese
     ja: 'こんにちは', // Japanese
     ru: 'Здравствуйте', // Russian
-    gu: 'હેલો', //Gujrati
-    th: 'สวัสดี' //Thai
+    gu: 'હેલો', // Gujarati
+    th: 'สวัสดี' // Thai
   };
 
   // Automatically cycle through translations
@@ -56,11 +56,8 @@ const ScrollTrigger = () => {
   const text = '"Every word is a step towards creativity, and every shared idea transforms drafts into masterpieces. Together, we write the future."';
   const letters = text.split('');
 
-  // Framer Motion global transforms for opacity and shared transformations
+  // Framer Motion global transforms for opacity
   const opacity = useTransform(scrollYProgress, [0.1, 0.5], [0, 1]);
-  const transformX = useTransform(scrollYProgress, [0, 0.5, 1], [200, 0, 0]);
-  const transformY = useTransform(scrollYProgress, [0, 0.5, 1], [200, 0, 0]);
-  const rotateValue = useTransform(scrollYProgress, [0, 0.5, 1], [180, 0, 0]);
 
   return (
     <section className=''>
@@ -75,14 +72,19 @@ const ScrollTrigger = () => {
           {letters.map((letter, index) => {
             const { translateX, translateY, rotate } = randomTransforms[index] || {};
 
+            // Use a single set of transforms for each letter based on scroll position
+            const xTransform = useTransform(scrollYProgress, [0, 0.5, 1], [translateX, 0, 0]);
+            const yTransform = useTransform(scrollYProgress, [0, 0.5, 1], [translateY, 0, 0]);
+            const rotateTransform = useTransform(scrollYProgress, [0, 0.5, 1], [rotate, 0, 0]);
+
             return (
               <motion.span
                 key={index}
                 style={{
                   opacity,
-                  translateX: useTransform(scrollYProgress, [0, 0.5, 1], [translateX, 0, 0]),
-                  translateY: useTransform(scrollYProgress, [0, 0.5, 1], [translateY, 0, 0]),
-                  rotate: useTransform(scrollYProgress, [0, 0.5, 1], [rotate, 0, 0]),
+                  translateX: xTransform,
+                  translateY: yTransform,
+                  rotate: rotateTransform,
                   display: 'inline-block',
                 }}
                 className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-400"
