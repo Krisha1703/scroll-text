@@ -56,8 +56,8 @@ const ScrollTrigger = () => {
   const text = '"Every word is a step towards creativity, and every shared idea transforms drafts into masterpieces. Together, we write the future."';
   const letters = text.split('');
 
-  // Framer Motion global transforms
-  const opacity = useTransform(scrollYProgress, [0.1, 0.3], [1, 1]);
+  // Framer Motion global transforms for opacity
+  const opacity = useTransform(scrollYProgress, [0.1, 0.9], [0, 1]);
 
   return (
     <section className=''>
@@ -68,21 +68,26 @@ const ScrollTrigger = () => {
 
       {/* Scroll-triggered text animation */}
       <div ref={ref} className="md:h-[150vh] h-[20vh] lg:mt-0 md:-mt-40 flex justify-center items-center">
-        <motion.div className="flex flex-wrap sm:max-w-[300px] md:max-w-[450px] lg:max-w-[550px] justify-center">
+        <motion.div className="flex flex-wrap sm:max-w-[300px] md:max-w-[450px] lg:max-w-[550px] xl:max-w-full mx-40 justify-center">
           {letters.map((letter, index) => {
             const { translateX, translateY, rotate } = randomTransforms[index] || {};
+
+            // Apply transformations progressively based on scroll
+            const transformX = useTransform(scrollYProgress, [0, 0.5, 1], [translateX, 0, 0]);
+            const transformY = useTransform(scrollYProgress, [0, 0.5, 1], [translateY, 0, 0]);
+            const rotateValue = useTransform(scrollYProgress, [0, 0.5, 1], [rotate, 0, 0]);
 
             return (
               <motion.span
                 key={index}
                 style={{
                   opacity,
-                  translateX: translateX || 0,
-                  translateY: translateY || 0,
-                  rotate: rotate || 0,
+                  translateX: transformX,
+                  translateY: transformY,
+                  rotate: rotateValue,
                   display: 'inline-block',
                 }}
-                className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-400"
+                className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-600"
               >
                 {letter === ' ' ? '\u00A0' : letter}
               </motion.span>
