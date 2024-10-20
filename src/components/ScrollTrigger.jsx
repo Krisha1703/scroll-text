@@ -1,15 +1,23 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll } from 'framer-motion';
 
 const ScrollTrigger = () => {
   const ref = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [currentLanguage, setCurrentLanguage] = useState('en');
 
-  // Scroll progress from Framer Motion's useScroll
+  // Scroll progress using Framer Motion's useScroll
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
+
+  useEffect(() => {
+    // Manually update the scroll progress from Framer Motion's scrollYProgress
+    scrollYProgress.onChange((latest) => {
+      setScrollProgress(latest);
+    });
+  }, [scrollYProgress]);
 
   // Word "Hello" translations
   const helloTranslations = {
@@ -21,8 +29,8 @@ const ScrollTrigger = () => {
     zh: '你好',    // Chinese
     ja: 'こんにちは', // Japanese
     ru: 'Здравствуйте', // Russian
-    gu: 'હેલો', //Gujrati
-    th: 'สวัสดี' //Thai
+    gu: 'હેલો', // Gujarati
+    th: 'สวัสดี', // Thai
   };
 
   // Automatically cycle through translations
@@ -35,12 +43,29 @@ const ScrollTrigger = () => {
       setCurrentLanguage(languages[index]);
     }, 1000); // Change translation every second
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, []);
 
   // Sample text
   const text = '"Every word is a step towards creativity, and every shared idea transforms drafts into masterpieces. Together, we write the future."';
   const letters = text.split('');
+
+  // Pre-calculate random transforms for each letter
+  const randomTransforms = useRef(
+    letters.map(() => ({
+      translateX: Math.random() * 400 - 200,  // Random position between -200 and 200
+      translateY: Math.random() * 400 - 200,  // Random position between -200 and 200
+      rotate: Math.random() * 360 - 180,      // Random rotation between -180 and 180 degrees
+    }))
+  ).current;
+
+   // Calculate manual transforms based on scroll progress
+   const computeTransform = (startValue, endValue, progress, speedFactor = 1) => {
+    // Apply the speed factor to the scroll progress to make the effect faster
+    const adjustedProgress = Math.min(progress * speedFactor, 1);
+    return startValue + (endValue - startValue) * adjustedProgress;
+  };
+
 
   return (
     <section className=''>
@@ -50,24 +75,26 @@ const ScrollTrigger = () => {
       </h1>
 
       {/* Scroll-triggered text animation */}
-      <div ref={ref} className="md:h-[150vh] h-[20vh] lg:mt-0 md:-mt-40 flex justify-center items-center">
+      <div ref={ref} className="md:h-[150vh] h-[100vh] lg:mt-0 md:-mt-40 flex justify-center items-center">
         <motion.div className="flex flex-wrap sm:max-w-[300px] md:max-w-[450px] lg:max-w-[550px] xl:max-w-full mx-40 justify-center">
           {letters.map((letter, index) => {
-              const opacity = useTransform(scrollYProgress, [0.1, 0.3], [1, 1]);
-              const translateX = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]);
-              const translateY = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, (Math.random() * 400 - 200), 0]);
-              const rotate = useTransform(scrollYProgress, [0, 0.25, 0.5], [0, Math.random() * 360 - 180, 0]);
+            const { translateX: initialX, translateY: initialY, rotate: initialRotate } = randomTransforms[index];
+
+            // Apply a speed factor to make the animation faster
+            const speedFactor = 2; // Increase this value to make the effect faster
+            const translateX = computeTransform(initialX, 0, scrollProgress, speedFactor);
+            const translateY = computeTransform(initialY, 0, scrollProgress, speedFactor);
+            const rotate = computeTransform(initialRotate, 0, scrollProgress, speedFactor);
+            const opacity = Math.min(scrollProgress * speedFactor, 1); // Fade-in effect
 
             return (
               <motion.span
                 key={index}
                 style={{
-                    opacity,
-                    translateX,
-                    translateY,
-                    rotate,
-                    display: 'inline-block',
-                  }}
+                  transform: `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg)`,
+                  opacity,
+                  display: 'inline-block',
+                }}
                 className="lg:text-[1.2rem] md:text-md text-sm font-black text-blue-600"
               >
                 {letter === ' ' ? '\u00A0' : letter}
